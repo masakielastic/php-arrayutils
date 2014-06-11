@@ -39,7 +39,7 @@ static int le_arrayutils;
  * Every user visible function must have an entry in arrayutils_functions[].
  */
 const zend_function_entry arrayutils_functions[] = {
-	PHP_FE(confirm_arrayutils_compiled,	NULL)		/* For testing, remove later. */
+	PHP_FE(array_map_with_key,	NULL)		/* For testing, remove later. */
 	PHP_FE_END	/* Must be the last line in arrayutils_functions[] */
 };
 /* }}} */
@@ -148,21 +148,66 @@ PHP_MINFO_FUNCTION(arrayutils)
    so that your module can be compiled into PHP, it exists only for testing
    purposes. */
 
-/* Every user-visible function in PHP should document itself in the source */
-/* {{{ proto string confirm_arrayutils_compiled(string arg)
-   Return a string to confirm that the module is compiled in */
-PHP_FUNCTION(confirm_arrayutils_compiled)
+PHP_FUNCTION(array_map_with_key)
 {
-	char *arg = NULL;
-	int arg_len, len;
-	char *strg;
+    zval *array;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &arg, &arg_len) == FAILURE) {
-		return;
-	}
+    zend_fcall_info fci = empty_fcall_info;
+    zend_fcall_info_cache fci_cache = empty_fcall_info_cache;
+    zval **params[2];
+    zval **first_arg = NULL;
+    zval *second_arg = NULL;
+    zval *retval_ptr = NULL;
 
-	len = spprintf(&strg, 0, "Congratulations! You have successfully modified ext/%.78s/config.m4. Module %.78s is now compiled into PHP.", "arrayutils", arg);
-	RETURN_STRINGL(strg, len, 0);
+    char *string_key;
+    uint string_key_len;
+    ulong num_key;
+    HashPosition pos;
+
+    if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "af", &array, &fci, &fci_cache) == FAILURE) {
+        return;
+    }
+
+    array_init(return_value);
+    MAKE_STD_ZVAL(second_arg);
+
+    fci.param_count = 2;
+    fci.no_separation = 0;
+
+    for (zend_hash_internal_pointer_reset_ex(Z_ARRVAL_P(array), &pos);
+        zend_hash_get_current_data_ex(Z_ARRVAL_P(array), (void **) &first_arg, &pos) == SUCCESS;
+        zend_hash_move_forward_ex(Z_ARRVAL_P(array), &pos)
+    ) {
+
+        zend_hash_get_current_key_zval_ex(Z_ARRVAL_P(array), second_arg, &pos);
+
+        params[0] = first_arg;
+        params[1] = &second_arg;
+
+        fci.param_count = 2;
+        fci.params = params;
+        fci.no_separation = 0;
+        fci.retval_ptr_ptr = &retval_ptr;
+
+        if (zend_call_function(&fci, &fci_cache TSRMLS_CC) == SUCCESS && retval_ptr) {
+
+            zval_add_ref(&retval_ptr);
+
+            switch (zend_hash_get_current_key_ex(Z_ARRVAL_P(array), &string_key, &string_key_len, &num_key, 0, &pos)) {
+                case HASH_KEY_IS_STRING:
+                    zend_hash_update(Z_ARRVAL_P(return_value), string_key, string_key_len, (void **) &retval_ptr, sizeof(zval *), NULL);
+                    break;
+
+                case HASH_KEY_IS_LONG:
+                    zend_hash_index_update(Z_ARRVAL_P(return_value), num_key, (void **) &retval_ptr, sizeof(zval *), NULL);
+                    break;
+            }
+
+            zval_ptr_dtor(&retval_ptr);
+
+        }
+
+    }
 }
 /* }}} */
 /* The previous line is meant for vim and emacs, so it can correctly fold and 
