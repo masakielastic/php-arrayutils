@@ -7,9 +7,9 @@ dnl without editing.
 
 dnl If your extension references something external, use with:
 
-dnl PHP_ARG_WITH(arrayutils, for arrayutils support,
-dnl Make sure that the comment is aligned:
-dnl [  --with-arrayutils             Include arrayutils support])
+PHP_ARG_WITH(arrayutils, for arrayutils support,
+Make sure that the comment is aligned:
+[  --with-arrayutils             Include arrayutils support])
 
 dnl Otherwise use enable:
 
