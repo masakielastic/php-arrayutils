@@ -342,6 +342,77 @@ PHP_FUNCTION(array_take_while) {
     }
 
 }
+
+PHP_FUNCTION(array_drop_while) {
+
+    zval *array;
+
+    zend_fcall_info fci = empty_fcall_info;
+    zend_fcall_info_cache fci_cache = empty_fcall_info_cache;
+    zval **params[2];
+    zval **first_arg = NULL;
+    zval *second_arg = NULL;
+    zval *retval_ptr = NULL;
+
+    char *string_key;
+    uint string_key_len;
+    ulong num_key;
+    HashPosition pos;
+
+    zend_bool checked = false;
+
+    if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "af", &array, &fci, &fci_cache) == FAILURE) {
+        return;
+    }
+
+    array_init(return_value);
+    MAKE_STD_ZVAL(second_arg);
+
+    fci.param_count = 2;
+    fci.params = params;
+    fci.retval_ptr_ptr = &retval_ptr;
+    fci.no_separation = 0;
+
+    for (zend_hash_internal_pointer_reset_ex(Z_ARRVAL_P(array), &pos);
+        zend_hash_get_current_data_ex(Z_ARRVAL_P(array), (void **) &first_arg, &pos) == SUCCESS;
+        zend_hash_move_forward_ex(Z_ARRVAL_P(array), &pos)
+    ) {
+
+        zend_hash_get_current_key_zval_ex(Z_ARRVAL_P(array), second_arg, &pos);
+
+        params[0] = first_arg;
+        params[1] = &second_arg;
+        fci.params = params;
+
+        if (zend_call_function(&fci, &fci_cache TSRMLS_CC) == SUCCESS
+            && retval_ptr
+            && (checked || zend_is_true(retval_ptr))) {
+
+            checked = true;
+            zval_add_ref(first_arg);
+
+            switch (zend_hash_get_current_key_ex(Z_ARRVAL_P(array), &string_key, &string_key_len, &num_key, 0, &pos)) {
+                case HASH_KEY_IS_STRING:
+                    zend_hash_update(Z_ARRVAL_P(return_value), string_key, string_key_len, first_arg, sizeof(zval *), NULL);
+                    break;
+
+                case HASH_KEY_IS_LONG:
+                    zend_hash_index_update(Z_ARRVAL_P(return_value), num_key, first_arg, sizeof(zval *), NULL);
+                    break;
+            }
+
+        }
+
+    }
+
+    if (retval_ptr) {
+        zval_ptr_dtor(&retval_ptr);
+    }
+
+    if (params) {
+        zval_ptr_dtor(&params);
+    }
+}
 /* }}} */
 /* The previous line is meant for vim and emacs, so it can correctly fold and 
    unfold functions in source code. See the corresponding marks just before 
