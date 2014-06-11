@@ -48,6 +48,7 @@ PHP_FUNCTION(array_map_with_key);
 PHP_FUNCTION(array_filter_with_key);
 PHP_FUNCTION(array_take_while);
 PHP_FUNCTION(array_drop_while);
+PHP_FUNCTION(array_get_or_else);
 /* 
   	Declare any global variables you may need between the BEGIN
 	and END macros here:     

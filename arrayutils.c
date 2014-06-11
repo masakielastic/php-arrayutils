@@ -43,6 +43,7 @@ const zend_function_entry arrayutils_functions[] = {
 	PHP_FE(array_filter_with_key, NULL)
 	PHP_FE(array_take_while, NULL)
 	PHP_FE(array_drop_while, NULL)
+    PHP_FE(array_get_or_else, NULL)
 	PHP_FE_END	/* Must be the last line in arrayutils_functions[] */
 };
 /* }}} */
@@ -410,6 +411,48 @@ PHP_FUNCTION(array_drop_while) {
         zval_ptr_dtor(&retval_ptr);
     }
 }
+
+PHP_FUNCTION(array_get_or_else)
+{
+    zval *array, *offset, **entry, **default_value;
+    long index = 0;
+    char *key;
+    int key_len;
+
+    if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "azZ", &array, &offset, &default_value) == FAILURE) {
+        return;
+    }
+ 
+    switch (Z_TYPE_P(offset)) {
+        case IS_NULL:
+            index = 0;
+            break;
+        case IS_DOUBLE:
+            index = (long) Z_DVAL_P(offset);
+            break;
+        case IS_BOOL:
+        case IS_LONG:
+        case IS_RESOURCE:
+            index = Z_LVAL_P(offset);
+            break;
+        case IS_STRING:
+            key = Z_STRVAL_P(offset);
+            key_len = Z_STRLEN_P(offset);
+            break;
+        default:
+            key = "Unknown";
+            key_len = sizeof("Unknown") - 1;
+    }
+
+    if (!key && zend_hash_index_find(Z_ARRVAL_P(array), index, (void **) &entry) == FAILURE) {
+        RETURN_ZVAL(*default_value, 1, 0);
+    } else if (key && zend_hash_find(Z_ARRVAL_P(array), key, key_len + 1, (void **) &entry) == FAILURE) {
+        RETURN_ZVAL(*default_value, 1, 0);
+    } else 
+ 
+    RETURN_ZVAL(*entry, 1, 0);
+}
+
 /* }}} */
 /* The previous line is meant for vim and emacs, so it can correctly fold and 
    unfold functions in source code. See the corresponding marks just before 
