@@ -75,6 +75,7 @@ ZEND_END_MODULE_GLOBALS(arrayutils)
 #endif	/* PHP_ARRAYUTILS_H */
 
 PHP_FUNCTION(array_map_with_key);
+PHP_FUNCTION(array_filter_with_key);
 /*
  * Local variables:
  * tab-width: 4
