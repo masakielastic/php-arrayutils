@@ -76,6 +76,8 @@ ZEND_END_MODULE_GLOBALS(arrayutils)
 
 PHP_FUNCTION(array_map_with_key);
 PHP_FUNCTION(array_filter_with_key);
+PHP_FUNCTION(array_take_while);
+
 /*
  * Local variables:
  * tab-width: 4
