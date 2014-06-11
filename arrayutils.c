@@ -409,10 +409,6 @@ PHP_FUNCTION(array_drop_while) {
     if (retval_ptr) {
         zval_ptr_dtor(&retval_ptr);
     }
-
-    if (params) {
-        zval_ptr_dtor(&params);
-    }
 }
 /* }}} */
 /* The previous line is meant for vim and emacs, so it can correctly fold and 

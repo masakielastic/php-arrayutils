@@ -44,8 +44,10 @@ PHP_RINIT_FUNCTION(arrayutils);
 PHP_RSHUTDOWN_FUNCTION(arrayutils);
 PHP_MINFO_FUNCTION(arrayutils);
 
-PHP_FUNCTION(confirm_arrayutils_compiled);	/* For testing, remove later. */
-
+PHP_FUNCTION(array_map_with_key);
+PHP_FUNCTION(array_filter_with_key);
+PHP_FUNCTION(array_take_while);
+PHP_FUNCTION(array_drop_while);
 /* 
   	Declare any global variables you may need between the BEGIN
 	and END macros here:     
@@ -73,11 +75,6 @@ ZEND_END_MODULE_GLOBALS(arrayutils)
 #endif
 
 #endif	/* PHP_ARRAYUTILS_H */
-
-PHP_FUNCTION(array_map_with_key);
-PHP_FUNCTION(array_filter_with_key);
-PHP_FUNCTION(array_take_while);
-PHP_FUNCTION(array_drop_while);
 
 /*
  * Local variables:
