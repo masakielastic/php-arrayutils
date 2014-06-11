@@ -42,6 +42,7 @@ const zend_function_entry arrayutils_functions[] = {
 	PHP_FE(array_map_with_key, NULL)
 	PHP_FE(array_filter_with_key, NULL)
 	PHP_FE(array_take_while, NULL)
+	PHP_FE(array_drop_while, NULL)
 	PHP_FE_END	/* Must be the last line in arrayutils_functions[] */
 };
 /* }}} */
